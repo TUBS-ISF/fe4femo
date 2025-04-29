@@ -30,7 +30,7 @@ df = df.rename(columns=translator_dict)
 print(df)
 
 plot = (so.Plot(df, y="model_quality", color="feature_selector", marker="feature_selector")
-        .pair(x=[translator_dict['feature_time'], translator_dict["task_time"]]).facet(row="ml_task")
+        .pair(x=[translator_dict['feature_time'], translator_dict["task_time"]]).facet(row="ml_task", order=['Runtime Kissat', 'Runtime CaDiBack', 'Runtime Spur', 'FM Cardinality', 'Backbone Size', '#SAT Algorithm Selection'])
         .add(so.Dot()).limit(y=(-1,1))
         .layout(size=(15,20)).scale(x="log", color=so.Nominal(order=get_order()))
         .label(legend="Feature Selector", y="Model Quality"))
