@@ -16,20 +16,20 @@ class DataProvider(metaclass=ABCMeta):
     def _load_data(self, data_root: pathlib.Path):
         pass
 
-    @abstractmethod
-    def _clean_data(self, data):
-        pass
 
     @abstractmethod
     def _remove_feature_target_duplicates(self, data):
         pass
 
     @abstractmethod
-    def get_data(self, data_root: pathlib.Path) -> pd.DataFrame:
+    def _load_labels(self, data_root: pathlib.Path):
+        pass
+
+    def get_data(self, data_root: pathlib.Path) -> tuple[pd.DataFrame, pd.Series]:
         data = self._load_data(data_root)
-        data_cleaned = self._clean_data(data)
-        data_removed = self._remove_feature_target_duplicates(data_cleaned)
-        return data_removed
+        data_removed = self._remove_feature_target_duplicates(data)
+        labels = self._load_labels(data_root)
+        return data_removed, labels
 
     @abstractmethod
     def get_label_type(self) -> LabelType:
