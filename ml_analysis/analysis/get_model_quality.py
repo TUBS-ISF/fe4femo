@@ -1,4 +1,6 @@
 import os
+import time
+from operator import itemgetter
 from pathlib import Path
 
 import pandas as pd
@@ -17,12 +19,16 @@ def get_model_quality(file) -> list[float]:
     for trial_container in dictonary["trial_container"]:
         model = trial_container.model
         set_njobs_if_possible(model, 1)
+        start_Model = time.time()
         y_pred = model.predict(trial_container.x_test)
+        end_Model = time.time()
         y_test = dictonary["y_test"]
+        time_elapsed = end_Model - start_Model
         if is_model_classifier(trial_container.model):
-            ret_list.append(matthews_corrcoef(y_test, y_pred))
+            model_qual = matthews_corrcoef(y_test, y_pred)
         else:
-            ret_list.append(d2_absolute_error_score(y_test, y_pred).item())
+            model_qual = d2_absolute_error_score(y_test, y_pred).item()
+        ret_list.append((model_qual, time_elapsed, trial_container.time_Model))
     return ret_list
 
 def _parallel_wrapper(experiment_instance : ExperimentInstance)->tuple[tuple, list[float]]:
@@ -32,20 +38,27 @@ def _parallel_wrapper(experiment_instance : ExperimentInstance)->tuple[tuple, li
     return index_tuple, qualities
 
 if __name__ == '__main__':
-    config_path = Path("~/fe4femo/ml_analysis/slurm_scripts/config.txt").expanduser()
-    data_path = Path("~/fe4femo/ml_analysis/out/main/").expanduser()
-    out_file = Path("~/fe4femo/ml_analysis/out/model_quality.csv").expanduser()
+    config_path = Path("/mnt/c/Users/rsd61/IdeaProjects/fe4femo/ml_analysis/config.txt").expanduser()
+    data_path = Path("/mnt/d/MA/ml_main/main/").expanduser()
+    out_file_qual = Path("model_quality.csv").expanduser()
+    out_file_times = Path("model_times.csv").expanduser()
 
     experiment_instances = list_experiment_instances(config_path, data_path)
-    #ret_gen = Parallel(n_jobs=40, verbose=10)(delayed(_parallel_wrapper)(experiment_instance) for experiment_instance in experiment_instances)
-    ret_gen = (_parallel_wrapper(experiment_instance) for experiment_instance in experiment_instances)
+    ret_gen = Parallel(n_jobs=16, verbose=10, return_as='generator_unordered')(delayed(_parallel_wrapper)(experiment_instance) for experiment_instance in experiment_instances)
+    #ret_gen = (_parallel_wrapper(experiment_instance) for experiment_instance in experiment_instances)
 
     index_tuples = []
-    values = []
+    values_qual = []
+    values_time = []
     for index_tuple, qualities in ret_gen:
         index_tuples.append(index_tuple)
-        values.append(max(qualities))
+        maximum = max(qualities, key=itemgetter(0))
+        values_qual.append(maximum[0])
+        values_time.append((maximum[1],maximum[2]))
 
     multi_index = MultiIndex.from_tuples(index_tuples, names=["ml_task", "feature_selector", "ml_model", "model_hpo", "selector_hpo", "multi_objective", "fold"])
-    df = pd.Series(values, index=multi_index, name="model_quality")
-    df.to_csv(out_file)
+    df = pd.Series(values_qual, index=multi_index, name="model_quality")
+    df.to_csv(out_file_qual)
+
+    df_time = pd.DataFrame(values_time, index=multi_index, columns=["model_eval", "model_training"])
+    df_time.to_csv(out_file_times)
