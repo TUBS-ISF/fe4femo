@@ -24,6 +24,7 @@ def load_multiindex(file, column) -> pd.DataFrame:
     df.index = [df.index.get_level_values(0), df.index.map(lambda idx: f"{idx[1]}_MO" if idx[5] else idx[1]),
                 df.index.get_level_values(2), df.index.get_level_values(6)]
     df = df.rename_axis(["ml_task", "feature_selector", "ml_model", "fold"])
+    df = df.sort_index()
     df = df.reset_index()
     # filter optuna-combined_MO
     df = df[df['feature_selector'] != "optuna-combined_MO"]
