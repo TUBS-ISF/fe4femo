@@ -19,16 +19,24 @@ print(df)
 idx = pd.IndexSlice
 
 
-selector, model = df.groupby(by=["feature_selector", "ml_model"])['model_quality'].median().idxmax()
+selector, model = (df.groupby(by=["feature_selector", "ml_model"])['model_quality']
+                   .mean()
+                   .idxmax())
+print(f"SBM: {selector} + {model}")
 df_sbm = df.loc[idx[:, :, selector, model],'model_quality']
 print(df_sbm)
 df['SBM'] = df_sbm.reset_index().set_index(["fold","ml_task"])['model_quality']
 
-df_vbm = df.groupby(by=["ml_task", "feature_selector", "ml_model"])['model_quality'].median().groupby("ml_task").idxmax()
+df_vbm = (df.groupby(by=["ml_task", "feature_selector", "ml_model"])['model_quality']
+          .mean()
+          .groupby("ml_task")
+          .idxmax())
+print("VBM")
+print(df_vbm)
 df_modded = [ df.loc[idx[:, task, selector, model],'model_quality'] for task, selector, model in df_vbm.to_list()]
 df_vbm = pd.concat(df_modded)
 print(df_vbm)
-df['WBM'] = df_vbm.reset_index().set_index(["fold","ml_task"])['model_quality']
+df['VBM'] = df_vbm.reset_index().set_index(["fold","ml_task"])['model_quality']
 
 
 df_idmax = df.loc[df.groupby(by=["fold","ml_task"])['model_quality'].idxmax()].reset_index().set_index(["fold","ml_task"])
@@ -36,6 +44,9 @@ df['idmax'] = df_idmax['model_quality']
 print(df_idmax)
 
 print(df)
+print(df.groupby("ml_task").describe().to_string())
+
+df.to_csv("model_quality_enriched.csv")
 
 
 # plot = sns.barplot(df, y="ml_task", x="diff", hue="fold", orient="h", estimator="median")

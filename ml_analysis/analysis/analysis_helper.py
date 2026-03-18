@@ -19,8 +19,11 @@ def get_optuna_study(file, study_name):
     study = load_study(storage=journal, study_name=study_name)
     return study, journal
 
-def load_multiindex(file, column) -> pd.DataFrame:
-    df = pd.read_csv(file, index_col=[0, 1, 2, 3, 4, 5, 6])[column]
+def load_multiindex(file, column = None) -> pd.DataFrame:
+    if column is None:
+        df = pd.read_csv(file, index_col=[0, 1, 2, 3, 4, 5, 6])
+    else:
+        df = pd.read_csv(file, index_col=[0, 1, 2, 3, 4, 5, 6])[column]
     df.index = [df.index.get_level_values(0), df.index.map(lambda idx: f"{idx[1]}_MO" if idx[5] else idx[1]),
                 df.index.get_level_values(2), df.index.get_level_values(6)]
     df = df.rename_axis(["ml_task", "feature_selector", "ml_model", "fold"])
