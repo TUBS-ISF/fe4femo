@@ -21,8 +21,8 @@ df = df.reset_index().melt(id_vars=['feature_selector', 'ml_model', 'ml_task', '
 print(df)
 
 plot = sns.catplot(df, x="time", y="ml_model",  col="task", col_order=[translator_dict['model_training'], translator_dict['model_eval']], estimator="median", errorbar="ci", kind="boxen", orient="h", legend="auto", height=2.5, aspect=2, line_kws={"linewidth": 2})
-plot.set(ylabel="ML Model", xscale='log', xlabel="Computation Time [s]")
-plot.set_titles(col_template="{col_name}")
+plot.set(ylabel="ML Model", xscale='log', xlabel="")
+plot.set_titles(col_template="")
 sns.despine(left=True, bottom=True)
 
 #for ax in plot.axes.flat:

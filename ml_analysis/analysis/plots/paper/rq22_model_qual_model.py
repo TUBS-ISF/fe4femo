@@ -16,11 +16,11 @@ df = get_modified_performance(path+file)
 
 plot = sns.catplot(df, x="model_quality", y="ml_model", col="ml_task", col_order=['Runtime Kissat', 'Runtime CaDiBack', 'Runtime Spur', 'FM Cardinality', 'Backbone Size', '#SAT Algorithm Selection'], estimator="median", errorbar="sd", kind="box", orient="h", facet_kws={"xlim":(-1,1)}, legend="auto", medianprops={"linewidth": 2}, height=4, aspect=0.8)
 plot.refline(x=0, color="r", linestyle="--")
-plot.set(xlim=(-1,1), ylabel="ML Model", xlabel="Model Quality")
+plot.set(xlim=(-1,1), ylabel="ML Model", xlabel="")
 plot.set_titles(col_template="{col_name}")
 
 sns.despine(left=True, bottom=True)
 plot.tight_layout()
 
-#plot.savefig("out/rq22_model_qual_model.pdf")
-plt.show()
+plot.savefig("out/rq22_model_qual_model.pdf")
+#plt.show()

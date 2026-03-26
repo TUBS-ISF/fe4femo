@@ -16,7 +16,7 @@ df = get_modified_performance(path+file)
 
 plot = sns.catplot(df, x="model_quality", y="feature_selector", col="ml_task", col_order=['Runtime Kissat', 'Runtime CaDiBack', 'Runtime Spur', 'FM Cardinality', 'Backbone Size', '#SAT Algorithm Selection'], estimator="median", order=get_order(), errorbar="sd", kind="box", orient="h", facet_kws={"xlim":(-1,1)}, legend="auto", medianprops={"linewidth": 2}, height=4, aspect=0.8)
 plot.refline(x=0, color="r", linestyle="--")
-plot.set(xlim=(-1,1), ylabel="Feature Selector", xlabel="Model Quality")
+plot.set(xlim=(-1,1), ylabel="Feature Selector", xlabel="")
 plot.set_titles(col_template="{col_name}")
 
 sns.despine(left=True, bottom=True)

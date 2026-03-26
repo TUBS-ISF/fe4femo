@@ -49,7 +49,7 @@ plot_dots(df, "VBM", 'x', 'orange', "Virtual Best Configuration")
 
 plt.gcf().set_size_inches(6,3)
 
-plt.legend(bbox_to_anchor=(0.48, 1), loc='lower center', borderaxespad=0., ncol=2, fancybox=True, title="Reference Configurations")
+plt.legend(bbox_to_anchor=(0.48, 1), loc='lower center', borderaxespad=0., ncol=2, fancybox=True, title="")
 
 sns.despine(left=True, bottom=True)
 plt.tight_layout()
