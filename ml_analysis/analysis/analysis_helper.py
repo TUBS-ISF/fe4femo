@@ -75,7 +75,7 @@ def get_replace_dictionary() -> dict:
     return {"SATzilla": "SATZilla", "FM_Chara": "FM Fact Label", "kbest-mutalinfo": "MI Filtering", "multisurf":"MultiSURF",
             "genetic" : "Genetic", "embedded-tree" : "Embedded Tree", "optuna-combined" : "FS as HPO", "SVD-entropy" : "SVD-Entropy",
             "runtime_sat" : "Runtime Kissat", "runtime_backbone" : "Runtime CaDiBack", "runtime_spur" : "Runtime Spur",
-            "value_ssat" : "FM Cardinality", "value_backbone" : "Backbone Size", "algo_selection" : "#SAT Algorithm Selection",
+            "value_ssat" : "CM Cardinality", "value_backbone" : "Backbone Size", "algo_selection" : "#SAT Algorithm Selection",
             "all": "Complete", "prefilter": "Prefiltering",
             "randomForest" : "Random Forest", "gradboostForest" : "GB Trees", "adaboost": "AdaBoost"}
 

@@ -194,8 +194,8 @@ def checkInputType(Z):
 
 # ----------------------------- own ----------------------------
 
-path = "/home/ubuntu/MA/raphael-dunkel-master/data/extracted_ml_results/feature_active.csv"
-path_out = "/home/ubuntu/MA/raphael-dunkel-master/data/extracted_ml_results/sel_stability.csv"
+path = "/mnt/c/Users/rsd61/IdeaProjects/ma-raphael-dunkel/data/extracted_ml_results/feature_active.csv"
+path_out = "sel_stability.csv"
 
 df = pd.read_csv(path, index_col=[0, 1, 2, 3, 4, 5, 6])
 df = df[df.index.get_level_values(5) == False]
