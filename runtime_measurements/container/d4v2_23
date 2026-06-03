@@ -25,7 +25,7 @@ Stage: builder
     ./build.sh
 
 From: ubuntu:24.04
-Stage: container
+Stage: final
 %post
     apt-get update && apt-get -y install libgmp3-dev bc coreutils
     mkdir /in/
@@ -35,13 +35,14 @@ Stage: container
 
 %files from builder
     /app/d4v2/build/d4 /app/
+
+%files from final
     runscripts/measure.sh /app/
+    runscripts/d4v2_23.sh /app/start.sh
+
 %post
     chmod 0777 measure.sh
-
-%files
-    runscripts/d4v2_23.sh /app/start.sh
-%post
     chmod 0777 start.sh
 
-%runscript ["/app/measure.sh"]
+%runscript
+    /app/measure.sh

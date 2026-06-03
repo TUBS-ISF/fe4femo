@@ -18,7 +18,7 @@ Stage: builder
     make
 
 From: ubuntu:24.04
-Stage: container
+Stage: final
 
 %post 
     apt-get update && apt-get -y install libgmp-dev libmpfr-dev libboost-all-dev bc
@@ -29,10 +29,12 @@ Stage: container
 
 %files from builder
     /app/source/countAntom /app/
+%files from final
     runscripts/measure.sh /app/
     runscripts/countantom.sh /app/start.sh
 %post 
     chmod 0777 measure.sh
     chmod 0777 start.sh
 
-%runscript ["/app/measure.sh"]
+%runscript
+    /app/measure.sh

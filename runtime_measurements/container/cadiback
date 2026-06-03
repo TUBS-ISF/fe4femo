@@ -15,7 +15,7 @@ Stage: builder
     ./configure && make
 
 From: alpine:3.20.3
-Stage: container
+Stage: final
 
 %post 
     apk add --no-cache bash build-base bc coreutils
@@ -26,10 +26,14 @@ Stage: container
 
 %files from builder
     /app/cadiback/cadiback /app/
+
+%files from final
     runscripts/measure.sh /app/
     runscripts/cadiback.sh /app/start.sh
-%post 
+
+%post
     chmod 0777 measure.sh
     chmod 0777 start.sh
 
-%runscript ["/app/measure.sh"]
+%runscript
+    /app/measure.sh
