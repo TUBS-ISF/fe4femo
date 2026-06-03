@@ -1,34 +1,35 @@
-FROM ubuntu:24.04 AS builder
+Bootstrap: docker
+From: ubuntu:24.04
 
-RUN apt-get update && apt-get -y install git cmake gcc build-essential manpages-dev software-properties-common wget
-RUN add-apt-repository ppa:ubuntu-toolchain-r/test
-RUN apt-get update && apt-get -y install gcc-11 g++-11
-RUN rm /usr/bin/gcc && rm /usr/bin/g++
-RUN ln -s /usr/bin/gcc-11 /usr/bin/gcc && ln -s /usr/bin/g++-11 /usr/bin/g++
+%post apt-get update && apt-get -y install git cmake gcc build-essential manpages-dev software-properties-common wget
+%post add-apt-repository ppa:ubuntu-toolchain-r/test
+%post apt-get update && apt-get -y install gcc-11 g++-11
+%post rm /usr/bin/gcc && rm /usr/bin/g++
+%post ln -s /usr/bin/gcc-11 /usr/bin/gcc && ln -s /usr/bin/g++-11 /usr/bin/g++
 
-RUN  apt-get update && apt-get -y install zlib1g.dev libgmp-dev libmpfr-dev libboost-all-dev
+%post  apt-get update && apt-get -y install zlib1g.dev libgmp-dev libmpfr-dev libboost-all-dev
 
-WORKDIR /app
+--cwd /app
 
-RUN wget https://projects.informatik.uni-freiburg.de/attachments/download/505/countAntom_1.0_source.tar.gz
-RUN tar -xf countAntom_1.0_source.tar.gz
-RUN make
+%post wget https://projects.informatik.uni-freiburg.de/attachments/download/505/countAntom_1.0_source.tar.gz
+%post tar -xf countAntom_1.0_source.tar.gz
+%post make
 
 FROM ubuntu:24.04
 
-RUN  apt-get update && apt-get -y install libgmp-dev libmpfr-dev libboost-all-dev bc 
+%post  apt-get update && apt-get -y install libgmp-dev libmpfr-dev libboost-all-dev bc
 
-RUN mkdir /in/
-RUN mkdir /out/
+%post mkdir /in/
+%post mkdir /out/
 
-WORKDIR /app
+--cwd /app
 
-COPY --from=builder /app/source/countAntom /app/
+%files --from=builder /app/source/countAntom /app/
 
-COPY runscripts/measure.sh /app/
-RUN chmod 0777 measure.sh
+%files runscripts/measure.sh /app/
+%post chmod 0777 measure.sh
 
-COPY runscripts/countantom.sh /app/start.sh
-RUN chmod 0777 start.sh
+%files runscripts/countantom.sh /app/start.sh
+%post chmod 0777 start.sh
 
-ENTRYPOINT ["/app/measure.sh"]
+%runscript ["/app/measure.sh"]

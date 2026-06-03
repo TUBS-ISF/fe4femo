@@ -1,33 +1,34 @@
-FROM alpine:3.20.3 AS builder
-RUN apk add --no-cache git build-base bash
+Bootstrap: docker
+From: alpine:3.20.3
+%post apk add --no-cache git build-base bash
 
-WORKDIR /app
+--cwd /app
 
-RUN chmod 0644 /etc/passwd
-RUN git clone https://github.com/arminbiere/cadical.git
-WORKDIR /app/cadical
-RUN ./configure && make
+%post chmod 0644 /etc/passwd
+%post git clone https://github.com/arminbiere/cadical.git
+--cwd /app/cadical
+%post ./configure && make
 
-WORKDIR /app/
-RUN git clone https://github.com/arminbiere/cadiback.git
-WORKDIR /app/cadiback
-RUN ./configure && make
+--cwd /app/
+%post git clone https://github.com/arminbiere/cadiback.git
+--cwd /app/cadiback
+%post ./configure && make
 
-FROM alpine:3.20.3
+From: alpine:3.20.3
 
-RUN apk add --no-cache bash build-base bc coreutils 
+%post apk add --no-cache bash build-base bc coreutils
 
-RUN mkdir /in/
-RUN mkdir /out/
+%post mkdir /in/
+%post mkdir /out/
 
-WORKDIR /app
+--cwd /app
 
-COPY --from=builder /app/cadiback/cadiback /app/
+%files --from=builder /app/cadiback/cadiback /app/
 
-COPY runscripts/measure.sh /app/
-RUN chmod 0777 measure.sh
+%files runscripts/measure.sh /app/
+%post chmod 0777 measure.sh
 
-COPY runscripts/cadiback.sh /app/start.sh
-RUN chmod 0777 start.sh
+%files runscripts/cadiback.sh /app/start.sh
+%post chmod 0777 start.sh
 
-ENTRYPOINT ["/app/measure.sh"]
+%runscript ["/app/measure.sh"]
