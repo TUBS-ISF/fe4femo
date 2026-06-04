@@ -24,6 +24,7 @@ Stage: builder
     cd /app/d4v2/demo/counter
     ./build.sh
 
+Bootstrap: docker
 From:ubuntu:24.04
 Stage: final
 
@@ -49,4 +50,4 @@ Stage: final
     chmod 0777 start.sh
 
 %runscript
-    /app/measure.sh
+    exec ./app/measure.sh
