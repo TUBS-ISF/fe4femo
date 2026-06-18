@@ -7,14 +7,23 @@ import scipy.stats as stats
 
 import math
 
+from matplotlib.lines import Line2D
+from statsmodels.base import transform
+
 from analysis.analysis_helper import get_replace_dictionary, get_order, get_reduction
+from analysis.plots.plot_helper import draw_shades
 
 path = "/mnt/c/Users/rsd61/IdeaProjects/ma-raphael-dunkel/data/extracted_ml_results/"
 
-sns.set_theme(context="paper", style="whitegrid", palette="colorblind", font_scale=1.1, font="Linux Libertine O", rc={'xtick.labelsize': 11, 'ytick.labelsize': 8})
+sns.set_theme(context="paper", style="whitegrid", palette="colorblind", font_scale=1.4, font="FreeSerif",)
 
-df_stab = pd.read_csv(path + "sel_stability.csv", index_col=[0, 1], header=0)
-df_red = get_reduction(path+"feature_active.csv")
+
+df_stab = pd.read_csv(path + "sel_stability.csv", index_col=[0, 1], header=0).reset_index()
+df_red = get_reduction(path+"feature_active.csv").reset_index()
+
+df_stab = df_stab[df_stab['feature_selector'] != 'all']
+df_red = df_red[df_red['feature_selector'] != 'Complete']
+
 df_red['rel_count'] = 1 - df_red['rel_count']
 
 df_stab = df_stab.reset_index()
@@ -31,23 +40,29 @@ df_stab['upper'] = df_stab['stability'] + stats.norm.ppf(1 - alpha / 2) * np.sqr
 
 
 fig, axs = plt.subplots(ncols=2, sharey=True)
-plot1 = sns.boxenplot(ax=axs[1], x="rel_count", y="feature_selector", data=df_red, order=get_order())
-plot1.set(xlim=(0,1.005), ylabel="Feature Selector", xlabel="")
+plot1 = sns.boxenplot(ax=axs[1], x="rel_count", y="feature_selector", data=df_red, order=get_order()[1:], line_kws={"color":"c", "linewidth":2})
+plot1.set(ylabel="Selectivity", xlabel="Relative Size")
 
 
-plot = so.Plot(df_stab, y="feature_selector", x="stability", xmin="lower", xmax="upper").add(so.Bar()).add(so.Range(linewidth=2)).scale(y=so.Nominal(order=get_order()))
+plot = so.Plot(df_stab, y="feature_selector", x="stability", xmin="lower", xmax="upper").add(so.Bar()).add(so.Range(linewidth=2)).scale(y=so.Nominal(order=get_order()[1:])).limit(x=(0.2, None))
 #plot = plot.layout(size=(8,12))
-plot = plot.limit(xlim=(0,1))
-plot = plot.label(x="", y="Feature Selector")
+plot = plot.label(x="Nogueira Stability", y="Feature Selector")
 plot.on(axs[0]).plot()
-axs[0].set_xlim(0,1.005)
 
-fig.set_figheight(2.5)
-fig.set_figwidth(12)
+
+
+plt.grid(which='Minor')
+
+
+
+fig.set_figheight(15*0.2)
+fig.set_figwidth(2*3.48)
 sns.despine(left=True, bottom=True)
 
 plt.subplots_adjust(wspace=5.0)
 plt.tight_layout()
+draw_shades(fig, axs[0], axs[1])
+
 #plt.show()
 plt.savefig("out/rq21_stability_reduction.pdf")
 
