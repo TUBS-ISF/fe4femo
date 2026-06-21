@@ -44,7 +44,7 @@ df = df.groupby(["ml_task", "feature_selector", "ml_model"]).mean()
 #palette = sns.color_palette([(0.00392156862745098, 0.45098039215686275, 0.6980392156862745)], n_colors=10)
 #palette = sns.color_palette([(0.33725490196078434, 0.7058823529411765, 0.9137254901960784)], n_colors=10)
 
-ax = sns.boxplot(df, x="model_quality", y="ml_task", order=['Runtime Kissat', 'Runtime CaDiBack', 'Runtime Spur', 'CM Cardinality', 'Backbone Size', '#SAT Alg. Sel.'], orient="h", medianprops={"linewidth": 1.5, }, fliersize=1 )
+ax = sns.boxplot(df, x="model_quality", y="ml_task", order=['Runtime Kissat', 'Runtime CaDiBack', 'Runtime Spur', 'CM Cardinality', 'Backbone Size', '#SAT Alg. Sel.'], orient="h", medianprops={"color":"c", "linewidth":2}, fliersize=1 )
 ax.set_xlim(-1,1.005)
 ax.set_xlabel("Model Quality")
 ax.set_ylabel("ML Task")
