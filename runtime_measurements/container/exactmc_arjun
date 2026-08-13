@@ -31,6 +31,7 @@ Stage: builder
     ln -s /lib/libz.so /usr/lib/
     ./build_static.sh ExactMC
 
+Bootstrap: docker
 From: alpine:3.20.3
 Stage: final
 
@@ -46,7 +47,7 @@ Stage: final
     /app/KCBox/build/ExactMC /app/
     /app/arjun-v2-linux64 /app/arjun
 
-%files
+%files from final
     runscripts/measure.sh /app/
     runscripts/exactmc_arjun.sh /app/start.sh
 
@@ -55,4 +56,4 @@ Stage: final
     chmod 0777 start.sh
 
 %runscript
-    /app/measure.sh"
+    exec ./app/measure.sh"

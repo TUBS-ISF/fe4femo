@@ -6,31 +6,28 @@ Stage: builder
     apk add --no-cache git build-base bash
     cd /app
     chmod 0644 /etc/passwd
-    git clone https://github.com/arminbiere/cadical.git
-    cd /app/cadical
-    ./configure && make
-    cd /app/
-    git clone https://github.com/arminbiere/cadiback.git
-    cd /app/cadiback
+    git clone https://github.com/arminbiere/kissat.git
+    cd /app/kissat
     ./configure && make
 
 Bootstrap: docker
 From: alpine:3.20.3
 Stage: final
 
-%post 
-    apk add --no-cache bash build-base bc coreutils
+%post
+    apk add --no-cache bash bc coreutils
+
     mkdir /in/
     mkdir /out/
 
     cd /app
 
 %files from builder
-    /app/cadiback/cadiback /app/
+    /app/kissat/build/kissat /app/
 
 %files from final
     runscripts/measure.sh /app/
-    runscripts/cadiback.sh /app/start.sh
+    runscripts/kissat.sh /app/start.sh
 
 %post
     chmod 0777 measure.sh
@@ -38,3 +35,4 @@ Stage: final
 
 %runscript
     exec ./app/measure.sh
+
