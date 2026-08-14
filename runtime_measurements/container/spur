@@ -1,0 +1,44 @@
+Bootstrap: docker
+From: ubuntu:24.04
+Stage: builder
+
+%post
+    apt-get update && apt-get -y install git libgmp3-dev cmake gcc build-essential manpages-dev software-properties-common
+    add-apt-repository ppa:ubuntu-toolchain-r/test
+    apt-get update && apt-get -y install gcc-11 g++-11
+    rm /usr/bin/gcc && rm /usr/bin/g++
+    ln -s /usr/bin/gcc-11 /usr/bin/gcc && ln -s /usr/bin/g++-11 /usr/bin/g++
+
+
+    cd /app
+
+    git clone https://github.com/ZaydH/spur.git
+    cd /app/spur
+    ./build.sh
+
+Bootstrap: docker
+From: ubuntu:24.04
+Stage: final
+
+%post
+    apt-get update && apt-get -y install libgmp3-dev bc
+
+    mkdir /in/
+    mkdir /out/
+
+    cd /app
+
+%files from builder
+    /app/spur/build/Release/spur /app/
+
+%files from final
+    runscripts/measure.sh /app/
+    runscripts/spur.sh /app/start.sh
+
+%post
+    chmod 0777 measure.sh
+    chmod 0777 start.sh
+
+%runscript
+    exec ./app/measure.sh
+

@@ -1,0 +1,53 @@
+Bootstrap: docker
+From: ubuntu:24.04
+Stage: builder
+
+%post
+    apt-get update && apt-get -y install git libgmp3-dev zlib1g-dev cmake gcc build-essential manpages-dev software-properties-common libboost-all-dev ninja-build wget
+    add-apt-repository ppa:ubuntu-toolchain-r/test
+    apt-get update && apt-get -y install gcc-11 g++-11
+    rm /usr/bin/gcc && rm /usr/bin/g++
+    ln -s /usr/bin/gcc-11 /usr/bin/gcc && ln -s /usr/bin/g++-11 /usr/bin/g++
+
+
+    cd /app
+
+    git clone https://github.com/crillab/d4v2.git
+
+    cd /app/d4v2/3rdParty/
+
+%post
+    wget https://faculty.cc.gatech.edu/~umit/PaToH/patoh-Linux-x86_64-2019-10-01.tar.gz
+    rm -rf patoh/*
+    tar -xf patoh-Linux-x86_64-2019-10-01.tar.gz
+    mv build/Linux-x86_64/* patoh/
+    cd /app/d4v2/demo/counter
+    ./build.sh
+
+Bootstrap: docker
+From:ubuntu:24.04
+Stage: final
+
+%post
+    apt-get update && apt-get -y install libgmp3-dev bc coreutils libboost-all-dev
+
+    mkdir /in/
+    mkdir /out/
+    mkdir /app/
+
+    cd /app
+
+%files from builder
+    /app/d4v2/demo/counter/build/counter /app/d4
+    /app/d4v2/build/libd4.a /app/
+
+%files from final
+    runscripts/measure.sh /app/
+    runscripts/d4v2_24.sh /app/start.sh
+
+%post
+    chmod 0777 measure.sh
+    chmod 0777 start.sh
+
+%runscript
+    exec ./app/measure.sh

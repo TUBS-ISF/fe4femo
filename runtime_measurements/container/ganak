@@ -1,0 +1,37 @@
+Bootstrap: docker
+From: alpine:3.20.3
+Stage: builder
+
+%post
+    apk add --no-cache git build-base bash wget
+
+    cd /app
+    wget https://msoos.org/private/ganak-v2.1-linux64
+
+Bootstrap: docker
+From: alpine:3.20.3
+Stage: final
+
+%post
+    apk add --no-cache bash bc coreutils
+    mkdir /in/
+    mkdir /out/
+
+    cd /app
+
+%files from builder
+    /app/ganak-v2.1-linux64 /app/ganak
+%post
+    chmod 0777 ganak
+
+%files from final
+    runscripts/measure.sh /app/
+    runscripts/ganak.sh /app/start.sh
+
+%post
+    chmod 0777 measure.sh
+    chmod 0777 start.sh
+
+%runscript
+    exec ./app/measure.sh
+

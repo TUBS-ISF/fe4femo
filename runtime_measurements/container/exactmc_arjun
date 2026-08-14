@@ -1,0 +1,59 @@
+Bootstrap: docker
+From: ubuntu:24.04
+Stage: builder
+
+%post
+    apt-get update && apt-get -y install git cmake gcc build-essential manpages-dev software-properties-common wget
+    add-apt-repository ppa:ubuntu-toolchain-r/test
+    apt-get update && apt-get -y install gcc-11 g++-11
+    rm /usr/bin/gcc && rm /usr/bin/g++
+    ln -s /usr/bin/gcc-11 /usr/bin/gcc && ln -s /usr/bin/g++-11 /usr/bin/g++
+
+    apt-get update && apt-get -y install zlib1g.dev libgmp-dev libmpfr-dev libmpc-dev
+
+    cd /app
+
+    wget https://msoos.org/private/arjun-v2-linux64
+    chmod 0777 arjun-v2-linux64
+
+    git clone https://github.com/meelgroup/KCBox
+    cd /app/KCBox
+    rm -rf cadical
+    git clone https://github.com/arminbiere/cadical.git
+    cd /app/KCBox/cadical
+    git checkout edad56f5b71ff7502a09786cb00df09c3b889317
+    ./configure && make
+    cd /app/KCBox
+    mkdir build
+    cd /app/KCBox/build
+    cp ../scripts/build_static.sh .
+    chmod u+x build_static.sh
+    ln -s /lib/libz.so /usr/lib/
+    ./build_static.sh ExactMC
+
+Bootstrap: docker
+From: alpine:3.20.3
+Stage: final
+
+%post
+    apk add --no-cache bash bc coreutils
+
+    mkdir /in/
+    mkdir /out/
+
+    cd /app
+
+%files from builder
+    /app/KCBox/build/ExactMC /app/
+    /app/arjun-v2-linux64 /app/arjun
+
+%files from final
+    runscripts/measure.sh /app/
+    runscripts/exactmc_arjun.sh /app/start.sh
+
+%post
+    chmod 0777 measure.sh
+    chmod 0777 start.sh
+
+%runscript
+    exec ./app/measure.sh"
