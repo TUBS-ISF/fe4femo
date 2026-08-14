@@ -9,7 +9,7 @@ Stage: builder
     rm /usr/bin/gcc && rm /usr/bin/g++
     ln -s /usr/bin/gcc-11 /usr/bin/gcc && ln -s /usr/bin/g++-11 /usr/bin/g++
 
-
+    mkdir /app/
     cd /app
 
     git clone https://github.com/crillab/d4v2.git
@@ -33,15 +33,14 @@ Stage: final
 
     mkdir /in/
     mkdir /out/
-    mkdir /app/
-
+    
     cd /app
 
 %files from builder
     /app/d4v2/demo/counter/build/counter /app/d4
     /app/d4v2/build/libd4.a /app/
 
-%files from final
+%files
     runscripts/measure.sh /app/
     runscripts/d4v2_24.sh /app/start.sh
 

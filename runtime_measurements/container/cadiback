@@ -4,6 +4,7 @@ Stage: builder
 
 %post
     apk add --no-cache git build-base bash
+    mkdir /app/
     cd /app
     chmod 0644 /etc/passwd
     git clone https://github.com/arminbiere/cadical.git
@@ -28,7 +29,7 @@ Stage: final
 %files from builder
     /app/cadiback/cadiback /app/
 
-%files from final
+%files
     runscripts/measure.sh /app/
     runscripts/cadiback.sh /app/start.sh
 

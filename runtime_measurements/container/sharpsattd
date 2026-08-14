@@ -4,7 +4,7 @@ Stage: builder
 
 %post
     apk add --no-cache git build-base bash libgmpxx gmp-dev mpfr-dev cmake
-
+    mkdir /app/
     cd /app
 
     git clone https://github.com/Laakeri/sharpsat-td.git
@@ -28,7 +28,7 @@ Stage: final
 %files from builder
     /app/sharpsat-td/bin/sharpSAT /app/sharpsat-td/bin/flow_cutter_pace17 /app/
 
-%files from final
+%files
     runscripts/measure.sh /app/
     runscripts/sharpsattd.sh /app/start.sh
 

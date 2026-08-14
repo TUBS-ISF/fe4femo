@@ -4,6 +4,7 @@ Stage: builder
 
 %post
     apk add --no-cache git build-base bash
+    mkdir /app/
     cd /app
     chmod 0644 /etc/passwd
     git clone https://github.com/arminbiere/kissat.git
@@ -25,7 +26,7 @@ Stage: final
 %files from builder
     /app/kissat/build/kissat /app/
 
-%files from final
+%files
     runscripts/measure.sh /app/
     runscripts/kissat.sh /app/start.sh
 

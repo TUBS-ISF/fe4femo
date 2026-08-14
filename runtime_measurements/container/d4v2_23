@@ -9,7 +9,7 @@ Stage: builder
     rm /usr/bin/gcc && rm /usr/bin/g++
     ln -s /usr/bin/gcc-11 /usr/bin/gcc && ln -s /usr/bin/g++-11 /usr/bin/g++
 
-
+    mkdir /app/
     cd /app
 
 %post
@@ -29,7 +29,7 @@ From: ubuntu:24.04
 Stage: final
 
 %post
-    apt-get update && apt-get -y install libgmp3-dev bc coreutils
+    apt-get update && apt-get -y install libgmp3-dev bc coreutils bash
     mkdir /in/
     mkdir /out/
 
@@ -38,13 +38,14 @@ Stage: final
 %files from builder
     /app/d4v2/build/d4 /app/
 
-%files from final
+%files
     runscripts/measure.sh /app/
     runscripts/d4v2_23.sh /app/start.sh
 
 %post
-    chmod 0777 measure.sh
-    chmod 0777 start.sh
+    chmod +x measure.sh
+    chmod +x start.sh
 
 %runscript
-    exec ./app/measure.sh
+    echo "Test"
+    exec /bin/bash /app/measure.sh "$@"

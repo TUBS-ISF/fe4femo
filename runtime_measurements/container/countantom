@@ -10,7 +10,7 @@ Stage: builder
     ln -s /usr/bin/gcc-11 /usr/bin/gcc && ln -s /usr/bin/g++-11 /usr/bin/g++
 
     apt-get update && apt-get -y install zlib1g.dev libgmp-dev libmpfr-dev libboost-all-dev
-
+    mkdir /app/
     cd /app
 
     wget https://projects.informatik.uni-freiburg.de/attachments/download/505/countAntom_1.0_source.tar.gz
@@ -31,12 +31,12 @@ Stage: final
 %files from builder
     /app/source/countAntom /app/
 
-%files from final
+%files
     runscripts/measure.sh /app/
     runscripts/countantom.sh /app/start.sh
 %post 
-    chmod 0777 measure.sh
-    chmod 0777 start.sh
+    chmod 777 measure.sh
+    chmod 777 start.sh
 
 %runscript
     exec ./app/measure.sh
