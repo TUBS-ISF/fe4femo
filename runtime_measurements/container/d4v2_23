@@ -39,7 +39,7 @@ Stage: final
     /app/d4v2/build/d4 /app/
 
 %files
-    runscripts/measure.sh /app/
+    runscripts/measure.sh /app/measure.sh
     runscripts/d4v2_23.sh /app/start.sh
 
 %post
