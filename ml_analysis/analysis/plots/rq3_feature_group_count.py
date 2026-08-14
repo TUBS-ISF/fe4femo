@@ -58,22 +58,29 @@ groups = groups.to_dict()
 
 df = pd.read_csv(path, index_col=[0, 1, 2, 3, 4, 5, 6])
 df = df[df.index.get_level_values(5) == False]
-print(df)
+
 df.reset_index(inplace=True)
 selector_count = df['feature_selector'].nunique()
+
 df.replace({False: 0, True: 1}, inplace=True)
-df.drop(columns=["ml_model", "model_hpo", "selector_hpo", "multi_objective", "fold"], inplace=True)
-df['max_count'] = 1
-df = df.groupby(['ml_task', 'feature_selector']).sum()
-print(df)
+#df.drop(columns=["ml_model", "model_hpo", "selector_hpo", "multi_objective", "fold"], inplace=True)
+
+df = df.groupby(["ml_task", "feature_selector", "ml_model", "model_hpo", "selector_hpo", "multi_objective", "fold"]).sum()
+
 df.reset_index(inplace=True)
-df = df.melt(id_vars=["ml_task", "feature_selector", "max_count"], var_name="feature", value_name="count")
-print(df)
+df = df.melt(id_vars=["ml_task", "feature_selector", "ml_model", "model_hpo", "selector_hpo", "multi_objective", "fold"], var_name="feature", value_name="count")
+
 
 #transform to groups
 df['group'] = df['feature'].apply(lambda x: groups[x])
 df.drop(columns=["feature"], inplace=True)
-df = df.groupby(['ml_task', 'feature_selector', 'group']).sum().reset_index()
+df = df.groupby(["ml_task", "feature_selector", "ml_model", "model_hpo", "selector_hpo", "multi_objective", "fold", 'group']).any().reset_index()
+df.replace({False: 0, True: 1}, inplace=True)
+df['max_count'] = 1
+df.drop(columns=["ml_task", "ml_model", "model_hpo", "selector_hpo", "multi_objective", "fold"], inplace=True)
+print(df)
+df = df.groupby(['group', 'feature_selector']).sum().reset_index()
+
 print(df)
 df['rel_count'] =  df['count'] / df['max_count']
 df['rel_count'] = df['rel_count'] / selector_count
