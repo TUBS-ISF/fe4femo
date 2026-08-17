@@ -9,10 +9,9 @@ Stage: builder
     rm /usr/bin/gcc && rm /usr/bin/g++
     ln -s /usr/bin/gcc-11 /usr/bin/gcc && ln -s /usr/bin/g++-11 /usr/bin/g++
 
-    mkdir /app/
+    mkdir /app
     cd /app
 
-%post
     git clone https://github.com/crillab/d4v2.git
     cd /app/d4v2
     git checkout cc730adbbdb59b6e05776fbf2939b2aba53f2b80
@@ -30,9 +29,9 @@ Stage: final
 
 %post
     apt-get update && apt-get -y install libgmp3-dev bc coreutils bash
-    mkdir /in/
-    mkdir /out/
-
+    mkdir /in
+    mkdir /out
+    mkdir -p /app
     cd /app
 
 %files from builder
@@ -48,4 +47,5 @@ Stage: final
 
 %runscript
     echo "Test"
+    cd /app
     exec /bin/bash /app/measure.sh "$@"
