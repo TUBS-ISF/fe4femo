@@ -6,7 +6,7 @@ sleep 2
 
 start=$(date '+%s.%N')
 
-time source start.sh $@
+time source start.sh "$@"
 
 end=$(date '+%s.%N')
 
