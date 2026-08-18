@@ -4,7 +4,7 @@ Stage: builder
 
 %post
     apk add --no-cache git build-base bash
-    mkdir /app/
+    mkdir /app
     cd /app
     chmod 0644 /etc/passwd
     git clone https://github.com/arminbiere/kissat.git
@@ -16,24 +16,25 @@ From: alpine:3.20.3
 Stage: final
 
 %post
-    apk add --no-cache bash bc coreutils
+    apk add --no-cache bash bc coreutils bash
 
-    mkdir /in/
-    mkdir /out/
-
+    mkdir /in
+    mkdir /out
+    mkdir -p /app
     cd /app
 
 %files from builder
     /app/kissat/build/kissat /app/
 
 %files
-    runscripts/measure.sh /app/
+    runscripts/measure.sh /app/measure.sh
     runscripts/kissat.sh /app/start.sh
 
 %post
-    chmod 0777 measure.sh
-    chmod 0777 start.sh
+    chmod +x measure.sh
+    chmod +x start.sh
 
 %runscript
-    exec ./app/measure.sh
+    cd /app
+    exec /bin/bash /app/measure.sh "$@"
 

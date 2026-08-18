@@ -6,79 +6,79 @@ Stage: builder
     dnf install -y epel-release
     dnf install -y fakeroot
     FAKEROOTDONTTRYCHOWN=1 fakeroot bash -c '
-	dnf install dnf-plugins-core
-	dnf upgrade --refresh -y
+        dnf install dnf-plugins-core
+        dnf upgrade --refresh -y
         dnf groupinstall -y "Development Tools"
         dnf config-manager --set-enabled powertools powertools-source
-	dnf install -y git cmake gcc wget gzip tar m4 gcc-c++ eigen3-devel glibc-static libstdc++-static
+        dnf install -y git cmake gcc wget gzip tar m4 gcc-c++ eigen3-devel glibc-static libstdc++-static
         cd /tmp
 
 	#############################
 	## ZLIB Manual Instalation ##
 	#############################
 	
-	wget https://zlib.net/zlib-1.3.2.tar.gz
-	tar xf zlib-1.3.2.tar.gz
-	cd zlib-1.3.2
+        wget https://zlib.net/zlib-1.3.2.tar.gz
+        tar xf zlib-1.3.2.tar.gz
+        cd zlib-1.3.2
 
-	./configure \
-    		--prefix=/usr \
-		--enable-static \
-		--disable-shared
+        ./configure \
+            --prefix=/usr \
+            --enable-static \
+            --disable-shared
 
         make -j$(nproc)
         make install
-	cd ..
+        cd ..
 
 	############################
 	## GMP Manual Instalation ##
 	############################
-	export CC=/usr/bin/gcc
-	export CXX=/usr/bin/g++
-	wget https://gmplib.org/download/gmp/gmp-6.3.0.tar.xz
-	tar xf gmp-6.3.0.tar.xz
-	cd gmp-6.3.0
+        export CC=/usr/bin/gcc
+        export CXX=/usr/bin/g++
+        wget https://gmplib.org/download/gmp/gmp-6.3.0.tar.xz
+        tar xf gmp-6.3.0.tar.xz
+        cd gmp-6.3.0
 	
-	./configure \
-		CC=/usr/bin/gcc \
-		CXX=/usr/bin/g++ \
-		--prefix=/usr \
-		--enable-cxx \
-		--enable-static \
-		--disable-shared
+        ./configure \
+            CC=/usr/bin/gcc \
+            CXX=/usr/bin/g++ \
+            --prefix=/usr \
+            --enable-cxx \
+            --enable-static \
+            --disable-shared
 	
         make -j$(nproc)
-	make install
-	cd ..	
+        make install
+        cd ..	
 	#############################
 	## MPFR Manual Instalation ##
 	#############################
-	wget https://www.mpfr.org/mpfr-current/mpfr-4.2.2.tar.gz
-	tar xf mpfr-4.2.2.tar.gz
-	cd mpfr-4.2.2
+        wget https://www.mpfr.org/mpfr-current/mpfr-4.2.2.tar.gz
+        tar xf mpfr-4.2.2.tar.gz
+        cd mpfr-4.2.2
 
-	./configure \
-		--prefix=/usr \
-		--enable-static \
-		--disable-shared
+        ./configure \
+            --prefix=/usr \
+            --enable-static \
+            --disable-shared
 
         make -j$(nproc)
-	make install
-	cd..	
+        make install
+        cd..	
 	#############################
 	## MPC Manual Instalation ###
 	#############################
 
-	rm -rf libmpc
-	wget https://ftp.gnu.org/gnu/mpc/mpc-1.3.1.tar.gz 
-	tar xf mpc-1.3.1.tar.gz
-	cd mpc-1.3.1
-	./configure \
-	    --prefix=/usr \
-	    --enable-static \
-	    --disable-shared
-	make j$(nproc)
-	make install
+        rm -rf libmpc
+        wget https://ftp.gnu.org/gnu/mpc/mpc-1.3.1.tar.gz 
+        tar xf mpc-1.3.1.tar.gz
+        cd mpc-1.3.1
+        ./configure \
+            --prefix=/usr \
+            --enable-static \
+            --disable-shared
+        make j$(nproc)
+        make install
     #############################
     ## VERIFY STATIC LIBRARIES
     #############################
@@ -97,7 +97,7 @@ Stage: builder
         ls -l /usr/lib64/libm.a
         ls -l /usr/lib/gcc/x86_64-redhat-linux/8/libstdc++.a
         
-        mkdir /app/
+        mkdir /app
         cd /app
 
         wget https://github.com/meelgroup/arjun/releases/download/release%2Fv2.7.3/arjun-linux-amd64.tar.gz
@@ -111,10 +111,10 @@ Stage: builder
         cd /app/KCBox/cadical    
         git checkout edad56f5b71ff7502a09786cb00df09c3b889317
         git submodule init && git submodule update
-	./configure && make -j$(nproc) && cd /app/KCBox
+        ./configure && make -j$(nproc) && cd /app/KCBox
         rm -rf build
         mkdir build && cd build     
-	cp ../scripts/build_static.sh .
+        cp ../scripts/build_static.sh .
         chmod u+x build_static.sh        
         ./build_static.sh ExactMC
         #############################
@@ -134,13 +134,13 @@ From: alpine:3.20.3
 Stage: final
 
 %post
-    apk add --no-cache bash bc coreutils
+    apk add --no-cache bash bc coreutils bash
 
-    mkdir /in/
-    mkdir /out/
+    mkdir /in
+    mkdir /out
 
     cd /app
-    chmod 0777 /app
+    chmod +x /app
 
 %files from builder
     /app/KCBox/build/ExactMC /app/ExactMC
@@ -151,10 +151,11 @@ Stage: final
     runscripts/exactmc_arjun.sh /app/start.sh
 
 %post
-    chmod 0777 /app/ExactMC
-    chmod 0777 /app/arjun
-    chmod 0777 /app/measure.sh
-    chmod 0777 /app/start.sh
+    chmod +x /app/ExactMC
+    chmod +x /app/arjun
+    chmod +x /app/measure.sh
+    chmod +x /app/start.sh
 
 %runscript
-    exec /app/measure.sh
+    cd /app
+    exec /bin/bash /app/measure.sh "$@"

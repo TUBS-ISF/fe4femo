@@ -4,7 +4,7 @@ Stage: builder
 
 %post
     apk add --no-cache git build-base bash libgmpxx gmp-dev mpfr-dev cmake
-    mkdir /app/
+    mkdir /app
     cd /app
 
     git clone https://github.com/Laakeri/sharpsat-td.git
@@ -18,24 +18,27 @@ From: alpine:3.20.3
 Stage: final
 
 %post
-    apk add --no-cache bash bc coreutils
+    apk add --no-cache bash bc coreutils bash
 
-    mkdir /in/
-    mkdir /out/
+    mkdir /in
+    mkdir /out
+    mkdir -p /app
 
     cd /app
 
 %files from builder
-    /app/sharpsat-td/bin/sharpSAT /app/sharpsat-td/bin/flow_cutter_pace17 /app/
+    /app/sharpsat-td/bin/sharpSAT /app/
+    /app/sharpsat-td/bin/flow_cutter_pace17 /app/
 
 %files
-    runscripts/measure.sh /app/
+    runscripts/measure.sh /app/measure.sh
     runscripts/sharpsattd.sh /app/start.sh
 
 %post
-    chmod 0777 measure.sh
-    chmod 0777 start.sh
+    chmod +x measure.sh
+    chmod +x start.sh
 
 %runscript
-    exec ./app/measure.sh
+    cd /app
+    exec /bin/bash /app/measure.sh "$@"
 

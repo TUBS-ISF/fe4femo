@@ -8,7 +8,7 @@ Stage: builder
     apt-get update && apt-get -y install gcc-11 g++-11
     rm /usr/bin/gcc && rm /usr/bin/g++
     ln -s /usr/bin/gcc-11 /usr/bin/gcc && ln -s /usr/bin/g++-11 /usr/bin/g++
-    mkdir /app/
+    mkdir /app
     cd /app
 
     git clone https://github.com/ZaydH/spur.git
@@ -20,24 +20,25 @@ From: ubuntu:24.04
 Stage: final
 
 %post
-    apt-get update && apt-get -y install libgmp3-dev bc
+    apt-get update && apt-get -y install libgmp3-dev bc bash
 
-    mkdir /in/
-    mkdir /out/
-
+    mkdir /in
+    mkdir /out
+    mkdir -p /app
     cd /app
 
 %files from builder
     /app/spur/build/Release/spur /app/
 
 %files
-    runscripts/measure.sh /app/
+    runscripts/measure.sh /app/measure.sh
     runscripts/spur.sh /app/start.sh
 
 %post
-    chmod 0777 measure.sh
-    chmod 0777 start.sh
+    chmod +x measure.sh
+    chmod +x start.sh
 
 %runscript
-    exec ./app/measure.sh
+    cd /app
+    exec /bin/bash /app/measure.sh "$@"
 

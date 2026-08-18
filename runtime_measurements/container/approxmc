@@ -3,41 +3,38 @@ From: alpine:3.20.3
 Stage: builder
 
 %post
-    mkdir /app/
+    mkdir /app
     apk add --no-cache git build-base bash wget gzip tar
     cd /app
     wget https://github.com/meelgroup/approxmc/releases/download/release%2Fv4.3.1/approxmc-v4.3.1-linux-amd64.tar.gz
     tar --no-same-owner -xvzf approxmc-v4.3.1-linux-amd64.tar.gz 
-    echo "=== CONTENT OF /app ==="
-    ls -lah /app
-    rm approxmc-v4.3.1-linux-amd64.tar.gz
-
+    
 Bootstrap: docker
 From: alpine:3.20.3
 Stage: final
 
 %post
-    apk add --no-cache bash bc coreutils
-    mkdir /in/
-    mkdir /out/
-
+    apk add --no-cache bash bc coreutils bash
+    mkdir /in
+    mkdir /out
+    mkdir -p /app
     cd /app
-    ls
+
 
 %files from builder
     /app/approxmc /app/
 
-%post
-    chmod 777 approxmc
 
 %files
-    runscripts/measure.sh /app/
+    runscripts/measure.sh /app/measure.sh
     runscripts/approxmc.sh /app/start.sh
 
 %post
-    chmod 777 measure.sh
-    chmod 777 start.sh
+    chmod +x approxmc
+    chmod +x measure.sh
+    chmod +x start.sh
     cd /app
 
 %runscript
-    exec ./app/measure.sh
+    cd /app
+    exec /bin/bash /app/measure.sh "$@"
