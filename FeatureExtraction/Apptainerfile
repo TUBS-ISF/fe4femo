@@ -78,14 +78,6 @@ Stage: final
 %files from fmchara
     /venv_fm_chara/ /venv_fm_chara/
 
-%post
-    apt-get -y update && \
-    apt-get install --no-install-recommends -y openjdk-21-jre-headless && \
-    rm -rf /var/lib/apt/lists/* && \
-    mkdir /out/ && mkdir /in/
-    mkdir /app/
-    cd /app
-
 %files from satzilla
     /app/external/revisiting_satzilla/SAT-features-competition2024/ /app/external/revisiting_satzilla/SAT-features-competition2024/
 
@@ -103,5 +95,14 @@ Stage: final
 %files from java
     /app/build/libs/FeatureExtraction-1.0-SNAPSHOT-all.jar fe.jar
 
+%post
+    apt-get -y update && \
+    apt-get install --no-install-recommends -y openjdk-21-jre-headless && \
+    rm -rf /var/lib/apt/lists/* && \
+    mkdir /out && mkdir /in
+    mkdir -p /app
+    cd /app
+
 %runscript
-    ["java", "-jar", "-Djava.io.tmpdir=/out/", "fe.jar"]
+    cd /app
+    exec java -Djava.io.tmpdir=/out/ -jar /app/fe.jar
