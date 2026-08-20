@@ -33,4 +33,5 @@ Stage: final
 
 
 %runscript
+    cd /app
     exec /bin/bash /app/measure.sh "$@"
