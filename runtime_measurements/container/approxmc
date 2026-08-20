@@ -13,14 +13,6 @@ Bootstrap: docker
 From: alpine:3.20.3
 Stage: final
 
-%post
-    apk add --no-cache bash bc coreutils bash
-    mkdir /in
-    mkdir /out
-    mkdir -p /app
-    cd /app
-
-
 %files from builder
     /app/approxmc /app/
 
@@ -30,11 +22,14 @@ Stage: final
     runscripts/approxmc.sh /app/start.sh
 
 %post
+    apk add --no-cache bash bc coreutils bash
+    mkdir /in
+    mkdir /out
+    mkdir -p /app
     chmod +x approxmc
     chmod +x measure.sh
     chmod +x start.sh
     cd /app
 
 %runscript
-    cd /app
     exec /bin/bash /app/measure.sh "$@"
