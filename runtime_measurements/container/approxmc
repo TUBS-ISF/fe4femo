@@ -26,10 +26,11 @@ Stage: final
     mkdir /in
     mkdir /out
     mkdir -p /app
+    cd /app
     chmod +x approxmc
     chmod +x measure.sh
     chmod +x start.sh
-    cd /app
+
 
 %runscript
     exec /bin/bash /app/measure.sh "$@"
