@@ -1,0 +1,27 @@
+Bootstrap: docker
+From: continuumio/miniconda3:24.9.2-0
+Stage: ml
+
+%environment
+    export PYTHONDONTWRITEBYTECODE='false'
+
+%files
+    environment.yml /app/environment.yml
+    . /app
+%post
+
+    mkdir /app
+    cd /app
+
+    conda env create -f environment.yml
+    conda clean -afy
+    rm -rf /root/.cache/pip/
+    rm -rf /tmp/*
+
+    mkdir -p /in /out
+
+
+%runscript
+    #!/bin/bash
+    cd /app
+    exec conda run --no-capture-output -n ml_analysis python /app/main_fold.py "$@"
