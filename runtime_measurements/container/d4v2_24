@@ -9,7 +9,7 @@ Stage: builder
     rm /usr/bin/gcc && rm /usr/bin/g++
     ln -s /usr/bin/gcc-11 /usr/bin/gcc && ln -s /usr/bin/g++-11 /usr/bin/g++
 
-    mkdir /app/
+    mkdir /app
     cd /app
 
     git clone https://github.com/crillab/d4v2.git
@@ -29,11 +29,12 @@ From:ubuntu:24.04
 Stage: final
 
 %post
-    apt-get update && apt-get -y install libgmp3-dev bc coreutils libboost-all-dev
+    apt-get update && apt-get -y install libgmp3-dev bc coreutils libboost-all-dev bash
 
-    mkdir /in/
-    mkdir /out/
-    
+    mkdir /in
+    mkdir /out
+    mkdir -p /app
+
     cd /app
 
 %files from builder
@@ -41,12 +42,13 @@ Stage: final
     /app/d4v2/build/libd4.a /app/
 
 %files
-    runscripts/measure.sh /app/
+    runscripts/measure.sh /app/measure.sh
     runscripts/d4v2_24.sh /app/start.sh
 
 %post
-    chmod 0777 measure.sh
-    chmod 0777 start.sh
+    chmod +x measure.sh
+    chmod +x start.sh
 
 %runscript
-    exec ./app/measure.sh
+    cd /app
+    exec /bin/bash /app/measure.sh "$@"
