@@ -19,13 +19,6 @@ Bootstrap: docker
 From: alpine:3.20.3
 Stage: final
 
-%post 
-    apk add --no-cache bash build-base bc coreutils bash
-    mkdir /in
-    mkdir /out
-    mkdir -p /app
-    cd /app
-
 %files from builder
     /app/cadiback/cadiback /app/
 
@@ -34,6 +27,11 @@ Stage: final
     runscripts/cadiback.sh /app/start.sh
 
 %post
+    apk add --no-cache bash build-base bc coreutils bash
+    mkdir /in
+    mkdir /out
+    mkdir -p /app
+    cd /app
     chmod +x measure.sh
     chmod +x start.sh
 

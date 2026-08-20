@@ -13,6 +13,13 @@ Bootstrap: docker
 From: alpine:3.20.3
 Stage: final
 
+%files from builder
+    /app/ganak /app/
+
+%files
+    runscripts/measure.sh /app/measure.sh
+    runscripts/ganak.sh /app/start.sh
+
 %post
     apk add --no-cache bash bc coreutils bash
     mkdir /in
@@ -20,17 +27,7 @@ Stage: final
     mkdir -p /app
 
     cd /app
-
-%files from builder
-    /app/ganak /app/
-%post
     chmod +x ganak
-
-%files
-    runscripts/measure.sh /app/measure.sh
-    runscripts/ganak.sh /app/start.sh
-
-%post
     chmod +x measure.sh
     chmod +x start.sh
 

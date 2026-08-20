@@ -15,14 +15,6 @@ Bootstrap: docker
 From: alpine:3.20.3
 Stage: final
 
-%post
-    apk add --no-cache bash bc coreutils bash
-
-    mkdir /in
-    mkdir /out
-    mkdir -p /app
-    cd /app
-
 %files from builder
     /app/kissat/build/kissat /app/
 
@@ -31,6 +23,13 @@ Stage: final
     runscripts/kissat.sh /app/start.sh
 
 %post
+    apk add --no-cache bash bc coreutils bash
+
+    mkdir /in
+    mkdir /out
+    mkdir -p /app
+    cd /app
+
     chmod +x measure.sh
     chmod +x start.sh
 

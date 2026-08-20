@@ -21,20 +21,19 @@ Bootstrap: docker
 From: ubuntu:24.04
 Stage: final
 
-%post 
-    apt-get update && apt-get -y install libgmp-dev libmpfr-dev libboost-all-dev bc bash
-    mkdir /in
-    mkdir /out
-    mkdir -p /app
-    cd /app
-
 %files from builder
     /app/source/countAntom /app/
 
 %files
     runscripts/measure.sh /app/measure.sh
     runscripts/countantom.sh /app/start.sh
-%post 
+
+%post
+    apt-get update && apt-get -y install libgmp-dev libmpfr-dev libboost-all-dev bc bash
+    mkdir /in
+    mkdir /out
+    mkdir -p /app
+    cd /app
     chmod +x measure.sh
     chmod +x start.sh
 

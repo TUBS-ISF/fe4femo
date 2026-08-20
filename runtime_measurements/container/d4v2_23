@@ -27,13 +27,6 @@ Bootstrap: docker
 From: ubuntu:24.04
 Stage: final
 
-%post
-    apt-get update && apt-get -y install libgmp3-dev bc coreutils bash
-    mkdir /in
-    mkdir /out
-    mkdir -p /app
-    cd /app
-
 %files from builder
     /app/d4v2/build/d4 /app/
 
@@ -42,10 +35,14 @@ Stage: final
     runscripts/d4v2_23.sh /app/start.sh
 
 %post
+    apt-get update && apt-get -y install libgmp3-dev bc coreutils bash
+    mkdir /in
+    mkdir /out
+    mkdir -p /app
+    cd /app
     chmod +x measure.sh
     chmod +x start.sh
 
 %runscript
-    echo "Test"
     cd /app
     exec /bin/bash /app/measure.sh "$@"

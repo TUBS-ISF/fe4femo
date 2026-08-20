@@ -1,59 +1,159 @@
 Bootstrap: docker
-From: ubuntu:24.04
+From: almalinux:8.10
 Stage: builder
 
 %post
-    apt-get update && apt-get -y install git cmake gcc build-essential manpages-dev software-properties-common wget
-    add-apt-repository ppa:ubuntu-toolchain-r/test
-    apt-get update && apt-get -y install gcc-11 g++-11
-    rm /usr/bin/gcc && rm /usr/bin/g++
-    ln -s /usr/bin/gcc-11 /usr/bin/gcc && ln -s /usr/bin/g++-11 /usr/bin/g++
+    dnf install -y epel-release
+    dnf install -y fakeroot
+    FAKEROOTDONTTRYCHOWN=1 fakeroot bash -c '
+        dnf install dnf-plugins-core
+        dnf upgrade --refresh -y
+        dnf groupinstall -y "Development Tools"
+        dnf config-manager --set-enabled powertools powertools-source
+        dnf install -y git cmake gcc wget gzip tar m4 gcc-c++ eigen3-devel glibc-static libstdc++-static
+        cd /tmp
 
-    apt-get update && apt-get -y install zlib1g.dev libgmp-dev libmpfr-dev libmpc-dev
+	#############################
+	## ZLIB Manual Instalation ##
+	#############################
 
-    cd /app
+        wget https://zlib.net/zlib-1.3.2.tar.gz
+        tar xf zlib-1.3.2.tar.gz
+        cd zlib-1.3.2
 
-    wget https://msoos.org/private/arjun-v2-linux64
-    chmod 0777 arjun-v2-linux64
+        ./configure \
+            --prefix=/usr \
+            --enable-static \
+            --disable-shared
 
-    git clone https://github.com/meelgroup/KCBox
-    cd /app/KCBox
-    rm -rf cadical
-    git clone https://github.com/arminbiere/cadical.git
-    cd /app/KCBox/cadical
-    git checkout edad56f5b71ff7502a09786cb00df09c3b889317
-    ./configure && make
-    cd /app/KCBox
-    mkdir build
-    cd /app/KCBox/build
-    cp ../scripts/build_static.sh .
-    chmod u+x build_static.sh
-    ln -s /lib/libz.so /usr/lib/
-    ./build_static.sh ExactMC
+        make -j$(nproc)
+        make install
+        cd ..
+
+	############################
+	## GMP Manual Instalation ##
+	############################
+        export CC=/usr/bin/gcc
+        export CXX=/usr/bin/g++
+        wget https://gmplib.org/download/gmp/gmp-6.3.0.tar.xz
+        tar xf gmp-6.3.0.tar.xz
+        cd gmp-6.3.0
+
+        ./configure \
+            CC=/usr/bin/gcc \
+            CXX=/usr/bin/g++ \
+            --prefix=/usr \
+            --enable-cxx \
+            --enable-static \
+            --disable-shared
+
+        make -j$(nproc)
+        make install
+        cd ..
+	#############################
+	## MPFR Manual Instalation ##
+	#############################
+        wget https://www.mpfr.org/mpfr-current/mpfr-4.2.2.tar.gz
+        tar xf mpfr-4.2.2.tar.gz
+        cd mpfr-4.2.2
+
+        ./configure \
+            --prefix=/usr \
+            --enable-static \
+            --disable-shared
+
+        make -j$(nproc)
+        make install
+        cd..
+	#############################
+	## MPC Manual Instalation ###
+	#############################
+
+        rm -rf libmpc
+        wget https://ftp.gnu.org/gnu/mpc/mpc-1.3.1.tar.gz
+        tar xf mpc-1.3.1.tar.gz
+        cd mpc-1.3.1
+        ./configure \
+            --prefix=/usr \
+            --enable-static \
+            --disable-shared
+        make j$(nproc)
+        make install
+    #############################
+    ## VERIFY STATIC LIBRARIES
+    #############################
+
+        echo "===== STATIC LIBRARIES ====="
+
+        find /usr -name "libgmp.a" -print
+        find /usr -name "libgmpxx.a" -print
+        find /usr -name "libmpfr.a" -print
+        find /usr -name "libmpc.a" -print
+        find /usr -name "libz.a" -print
+
+        echo "===== SYSTEM STATIC LIBRARIES ====="
+
+        ls -l /usr/lib64/libc.a
+        ls -l /usr/lib64/libm.a
+        ls -l /usr/lib/gcc/x86_64-redhat-linux/8/libstdc++.a
+
+        mkdir /app
+        cd /app
+
+        wget https://github.com/meelgroup/arjun/releases/download/release%2Fv2.7.3/arjun-linux-amd64.tar.gz
+        tar --no-same-owner -xvzf arjun-linux-amd64.tar.gz
+
+        git clone https://github.com/meelgroup/KCBox
+
+        cd /app/KCBox
+        rm -rf /app/KCBox/cadical
+        git clone https://github.com/arminbiere/cadical.git
+        cd /app/KCBox/cadical
+        git checkout edad56f5b71ff7502a09786cb00df09c3b889317
+        git submodule init && git submodule update
+        ./configure && make -j$(nproc) && cd /app/KCBox
+        rm -rf build
+        mkdir build && cd build
+        cp ../scripts/build_static.sh .
+        chmod u+x build_static.sh
+        ./build_static.sh ExactMC
+        #############################
+        ## VERIFY EXECUTABLE
+        #############################
+
+        echo "===== VERIFY EXACTMC ====="
+
+        ls -lh /app/KCBox/build/
+
+        file /app/KCBox/build/ExactMC
+
+        ldd /app/KCBox/build/ExactMC || true		   '
 
 Bootstrap: docker
 From: alpine:3.20.3
 Stage: final
 
-%post
-    apk add --no-cache bash bc coreutils
-
-    mkdir /in/
-    mkdir /out/
-
-    cd /app
-
 %files from builder
-    /app/KCBox/build/ExactMC /app/
-    /app/arjun-v2-linux64 /app/arjun
+    /app/KCBox/build/ExactMC /app/ExactMC
+    /app/arjun /app/arjun
 
-%files from final
-    runscripts/measure.sh /app/
+%files
+    runscripts/measure.sh /app/measure.sh
     runscripts/exactmc_arjun.sh /app/start.sh
 
 %post
-    chmod 0777 measure.sh
-    chmod 0777 start.sh
+    apk add --no-cache bash bc coreutils bash
+
+    mkdir /in
+    mkdir /out
+
+    cd /app
+    chmod +x /app
+    chmod +x /app/ExactMC
+    chmod +x /app/arjun
+    chmod +x /app/measure.sh
+    chmod +x /app/start.sh
 
 %runscript
-    exec ./app/measure.sh"
+    cd /app
+    exec /bin/bash /app/measure.sh "$@"

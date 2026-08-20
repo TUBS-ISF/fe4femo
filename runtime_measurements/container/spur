@@ -19,14 +19,6 @@ Bootstrap: docker
 From: ubuntu:24.04
 Stage: final
 
-%post
-    apt-get update && apt-get -y install libgmp3-dev bc bash
-
-    mkdir /in
-    mkdir /out
-    mkdir -p /app
-    cd /app
-
 %files from builder
     /app/spur/build/Release/spur /app/
 
@@ -35,6 +27,13 @@ Stage: final
     runscripts/spur.sh /app/start.sh
 
 %post
+    apt-get update && apt-get -y install libgmp3-dev bc bash
+
+    mkdir /in
+    mkdir /out
+    mkdir -p /app
+    cd /app
+
     chmod +x measure.sh
     chmod +x start.sh
 
