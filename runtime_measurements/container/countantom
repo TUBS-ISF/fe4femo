@@ -1,0 +1,42 @@
+Bootstrap: docker
+From: ubuntu:24.04
+Stage: builder
+
+%post
+    apt-get update && apt-get -y install git cmake gcc build-essential manpages-dev software-properties-common wget
+    add-apt-repository ppa:ubuntu-toolchain-r/test
+    apt-get update && apt-get -y install gcc-11 g++-11
+    rm /usr/bin/gcc && rm /usr/bin/g++
+    ln -s /usr/bin/gcc-11 /usr/bin/gcc && ln -s /usr/bin/g++-11 /usr/bin/g++
+
+    apt-get update && apt-get -y install zlib1g.dev libgmp-dev libmpfr-dev libboost-all-dev
+    mkdir /app
+    cd /app
+
+    wget https://projects.informatik.uni-freiburg.de/attachments/download/505/countAntom_1.0_source.tar.gz
+    tar -xf countAntom_1.0_source.tar.gz
+    make
+
+Bootstrap: docker
+From: ubuntu:24.04
+Stage: final
+
+%files from builder
+    /app/source/countAntom /app/
+
+%files
+    runscripts/measure.sh /app/measure.sh
+    runscripts/countantom.sh /app/start.sh
+
+%post
+    apt-get update && apt-get -y install libgmp-dev libmpfr-dev libboost-all-dev bc bash
+    mkdir /in
+    mkdir /out
+    mkdir -p /app
+    cd /app
+    chmod +x measure.sh
+    chmod +x start.sh
+
+%runscript
+    cd /app
+    exec /bin/bash /app/measure.sh "$@"

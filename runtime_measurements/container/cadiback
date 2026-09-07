@@ -1,0 +1,40 @@
+Bootstrap: docker
+From: alpine:3.20.3
+Stage: builder
+
+%post
+    apk add --no-cache git build-base bash
+    mkdir /app
+    cd /app
+    chmod 0644 /etc/passwd
+    git clone https://github.com/arminbiere/cadical.git
+    cd /app/cadical
+    ./configure && make
+    cd /app/
+    git clone https://github.com/arminbiere/cadiback.git
+    cd /app/cadiback
+    ./configure && make
+
+Bootstrap: docker
+From: alpine:3.20.3
+Stage: final
+
+%files from builder
+    /app/cadiback/cadiback /app/
+
+%files
+    runscripts/measure.sh /app/measure.sh
+    runscripts/cadiback.sh /app/start.sh
+
+%post
+    apk add --no-cache bash build-base bc coreutils bash
+    mkdir /in
+    mkdir /out
+    mkdir -p /app
+    cd /app
+    chmod +x measure.sh
+    chmod +x start.sh
+
+%runscript
+    cd /app
+    exec /bin/bash /app/measure.sh "$@"

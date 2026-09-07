@@ -1,0 +1,42 @@
+Bootstrap: docker
+From: alpine:3.20.3
+Stage: builder
+
+%post
+    apk add --no-cache git build-base bash libgmpxx gmp-dev mpfr-dev cmake
+    mkdir /app
+    cd /app
+
+    git clone https://github.com/Laakeri/sharpsat-td.git
+    cd /app/sharpsat-td
+    ./setupdev.sh static
+    ls
+    ls bin
+
+Bootstrap: docker
+From: alpine:3.20.3
+Stage: final
+
+%files from builder
+    /app/sharpsat-td/bin/sharpSAT /app/
+    /app/sharpsat-td/bin/flow_cutter_pace17 /app/
+
+%files
+    runscripts/measure.sh /app/measure.sh
+    runscripts/sharpsattd.sh /app/start.sh
+
+%post
+    apk add --no-cache bash bc coreutils bash
+
+    mkdir /in
+    mkdir /out
+    mkdir -p /app
+
+    cd /app
+    chmod +x measure.sh
+    chmod +x start.sh
+
+%runscript
+    cd /app
+    exec /bin/bash /app/measure.sh "$@"
+

@@ -1,0 +1,37 @@
+Bootstrap: docker
+From: alpine:3.20.3
+Stage: builder
+
+%post
+    apk add --no-cache git build-base bash wget gzip tar
+    mkdir /app
+    cd /app
+    wget https://github.com/meelgroup/ganak/releases/download/release%2Fv2.6.2/ganak-v2.6.2-linux-amd64.tar.gz    
+    tar --no-same-owner -xvzf ganak-v2.6.2-linux-amd64.tar.gz
+
+Bootstrap: docker
+From: alpine:3.20.3
+Stage: final
+
+%files from builder
+    /app/ganak /app/
+
+%files
+    runscripts/measure.sh /app/measure.sh
+    runscripts/ganak.sh /app/start.sh
+
+%post
+    apk add --no-cache bash bc coreutils bash
+    mkdir /in
+    mkdir /out
+    mkdir -p /app
+
+    cd /app
+    chmod +x ganak
+    chmod +x measure.sh
+    chmod +x start.sh
+
+%runscript
+    cd /app
+    exec /bin/bash /app/measure.sh "$@"
+
