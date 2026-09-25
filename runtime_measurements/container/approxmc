@@ -1,0 +1,37 @@
+Bootstrap: docker
+From: alpine:3.20.3
+Stage: builder
+
+%post
+    mkdir /app
+    apk add --no-cache git build-base bash wget gzip tar
+    cd /app
+    wget https://github.com/meelgroup/approxmc/releases/download/release%2Fv4.3.1/approxmc-v4.3.1-linux-amd64.tar.gz
+    tar --no-same-owner -xvzf approxmc-v4.3.1-linux-amd64.tar.gz 
+    
+Bootstrap: docker
+From: alpine:3.20.3
+Stage: final
+
+%files from builder
+    /app/approxmc /app/
+
+
+%files
+    runscripts/measure.sh /app/measure.sh
+    runscripts/approxmc.sh /app/start.sh
+
+%post
+    apk add --no-cache bash bc coreutils bash
+    mkdir /in
+    mkdir /out
+    mkdir -p /app
+    cd /app
+    chmod +x approxmc
+    chmod +x measure.sh
+    chmod +x start.sh
+
+
+%runscript
+    cd /app
+    exec /bin/bash /app/measure.sh "$@"
